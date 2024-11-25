@@ -1,7 +1,8 @@
-import express, { Express } from 'express';
+import express, { Express, NextFunction, Request, Response} from 'express';
 import { Server } from 'http';
 import { ILogger } from './logger/logger.interface';
 import { UserController } from './users/users.controller';
+import { ExeptionFilter } from './errors/exeption.filter';
 
 export class App {
     app: Express;
@@ -9,12 +10,14 @@ export class App {
     server: Server;
     logger: ILogger;
     userController: UserController;
+    exeptionFilter: ExeptionFilter;
 
-    constructor(logger: ILogger, userController: UserController) {
+    constructor(logger: ILogger, userController: UserController, exeptionFilter: ExeptionFilter) {
         this.app = express(); 
         this.port = 8001;
         this.logger = logger;
         this.userController = userController;
+        this.exeptionFilter = exeptionFilter;
     }
 
     useRoutes() {
@@ -24,7 +27,12 @@ export class App {
         })
     }
 
+    useExeptionFilters() {
+        this.app.use(this.exeptionFilter.catch.bind(this.exeptionFilter));
+    } 
+
     public async init() {
         this.useRoutes();
+        this.useExeptionFilters();
     }
 }
