@@ -1,21 +1,26 @@
 import express, { Express } from 'express';
-import { userRouter } from './users/users';
 import { Server } from 'http';
+import { ILogger } from './logger/logger.interface';
+import { UserController } from './users/users.controller';
 
 export class App {
     app: Express;
     port: number;
     server: Server;
+    logger: ILogger;
+    userController: UserController;
 
-    constructor() {
+    constructor(logger: ILogger, userController: UserController) {
         this.app = express(); 
         this.port = 8001;
+        this.logger = logger;
+        this.userController = userController;
     }
 
     useRoutes() {
-        this.app.use('/users', userRouter);
+        this.app.use('/users', this.userController.router);
         this.server = this.app.listen(this.port, () => {
-            console.log("Server started")
+            this.logger.log("Server started")
         })
     }
 
