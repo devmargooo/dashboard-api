@@ -1,9 +1,14 @@
 import { BaseController } from "../common/base.controller";
-import { LoggerService } from "../logger/logger.service";
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
+import { injectable, inject } from 'inversify';
+import { TYPES } from "../types";
+import { ILogger } from "../logger/logger.interface";
+import 'reflect-metadata';
+import { IUsersController } from "./users.interface";
 
-export class UserController extends BaseController {
-    constructor(logger: LoggerService) {
+@injectable()
+export class UserController extends BaseController implements IUsersController {
+    constructor(@inject(TYPES.ILogger) logger: ILogger) {
         super(logger);
         this.bindRouter([
             { path: '/login', method: 'post', func: this.login},
@@ -15,7 +20,7 @@ export class UserController extends BaseController {
         this.ok(res, 'login');
     }
 
-    register(req: Request, res: Response, next: NextFunction) {
+    register(req: Request, res: Response) {
         this.ok(res, 'register');
     }
 }
