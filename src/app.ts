@@ -1,4 +1,4 @@
-import express, { Express, NextFunction, Request, Response} from 'express';
+import express, { Express, NextFunction, Request, Response } from 'express';
 import { Server } from 'http';
 import { ILogger } from './logger/logger.interface';
 import { UserController } from './users/users.controller';
@@ -8,34 +8,35 @@ import { TYPES } from './types';
 import 'reflect-metadata';
 import { IUsersController } from './users/users.interface';
 
-@injectable() 
+@injectable()
 export class App {
-    app: Express;
-    port: number;
-    server: Server;
+	app: Express;
+	port: number;
+	server: Server;
 
-    constructor(
-        @inject(TYPES.ILogger) private logger: ILogger,
-        @inject(TYPES.IUsersController) private userController: IUsersController,
-        @inject(TYPES.ExeptionFilter) private exeptionFilter: ExeptionFilter
-    ) {
-        this.app = express(); 
-        this.port = 8001;
-    }
+	constructor(
+		@inject(TYPES.ILogger) private logger: ILogger,
+		@inject(TYPES.IUsersController) private userController: IUsersController,
+		@inject(TYPES.ExeptionFilter) private exeptionFilter: ExeptionFilter,
+	) {
+		this.app = express();
+		this.port = 8001;
+	}
 
-    useRoutes() {
-        this.app.use('/users', this.userController.router);
-        this.server = this.app.listen(this.port, () => {
-            this.logger.log("Server started")
-        })
-    }
+	useRoutes(): void {
+		this.app.use('/users', this.userController.router);
+	}
 
-    useExeptionFilters() {
-        this.app.use(this.exeptionFilter.catch.bind(this.exeptionFilter));
-    } 
+	useExeptionFilters(): void {
+		this.app.use(this.exeptionFilter.catch.bind(this.exeptionFilter));
+	}
 
-    public async init() {
-        this.useRoutes();
-        this.useExeptionFilters();
-    }
+	public async init(): Promise<void> {
+		this.useRoutes();
+		this.useExeptionFilters();
+
+		this.server = this.app.listen(this.port, () => {
+			this.logger.log('Server started');
+		});
+	}
 }
