@@ -5,6 +5,7 @@ import { TYPES } from '../types';
 import { ILogger } from '../logger/logger.interface';
 import 'reflect-metadata';
 import { IUsersController } from './users.interface';
+import { UserLoginDto } from './dto/user-login.dto';
 
 @injectable()
 export class UserController extends BaseController implements IUsersController {
@@ -16,8 +17,8 @@ export class UserController extends BaseController implements IUsersController {
 		]);
 	}
 
-	login(req: Request, res: Response): void {
-		console.log('blabla');
+	login(req: Request<any, any, UserLoginDto>, res: Response): void {
+		console.log(req.body);
 		this.ok(res, 'login');
 	}
 

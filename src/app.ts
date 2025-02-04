@@ -1,12 +1,13 @@
 import express, { Express, NextFunction, Request, Response } from 'express';
 import { Server } from 'http';
 import { ILogger } from './logger/logger.interface';
-import { UserController } from './users/users.controller';
+
 import { ExeptionFilter } from './errors/exeption.filter';
 import { injectable, inject } from 'inversify';
 import { TYPES } from './types';
 import 'reflect-metadata';
 import { IUsersController } from './users/users.interface';
+import { json } from 'body-parser';
 
 @injectable()
 export class App {
@@ -31,7 +32,12 @@ export class App {
 		this.app.use(this.exeptionFilter.catch.bind(this.exeptionFilter));
 	}
 
+	useMiddleware(): void {
+		this.app.use(json());
+	}
+
 	public async init(): Promise<void> {
+		this.useMiddleware();
 		this.useRoutes();
 		this.useExeptionFilters();
 
