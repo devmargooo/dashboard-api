@@ -6,12 +6,15 @@ import { LoggerService } from './logger/logger.service';
 import { TYPES } from './types';
 import { UserController } from './users/users.controller';
 import { Container, ContainerModule, interfaces } from 'inversify';
-import { IUsersController } from './users/users.interface';
+import { IUsersController } from './users/users.controller.interface';
+import { IUsersService } from './users/users.service.interface';
+import { UserService } from './users/users.service';
 
 export const appBindings = new ContainerModule((bind: interfaces.Bind) => {
 	bind<ILogger>(TYPES.ILogger).to(LoggerService);
 	bind<IExeptionFilter>(TYPES.ExeptionFilter).to(ExeptionFilter);
 	bind<IUsersController>(TYPES.IUsersController).to(UserController);
+	bind<IUsersService>(TYPES.IUserService).to(UserService);
 	bind<App>(TYPES.Application).to(App);
 });
 

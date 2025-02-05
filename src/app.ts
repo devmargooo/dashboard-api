@@ -6,7 +6,7 @@ import { ExeptionFilter } from './errors/exeption.filter';
 import { injectable, inject } from 'inversify';
 import { TYPES } from './types';
 import 'reflect-metadata';
-import { IUsersController } from './users/users.interface';
+import { IUsersController } from './users/users.controller.interface';
 import { json } from 'body-parser';
 
 @injectable()
