@@ -32,7 +32,6 @@ export class UserController extends BaseController implements IUsersController {
 	}
 
 	login(req: Request<any, any, UserLoginDto>, res: Response): void {
-		console.log('!!!', this);
 		console.log(req.body);
 		this.ok(res, 'login');
 	}
@@ -46,6 +45,6 @@ export class UserController extends BaseController implements IUsersController {
 		if (!result) {
 			return next(new HTTPError(422, 'Такой пользователь уже существует'));
 		}
-		this.ok(res, { email: result.email });
+		this.ok(res, { email: result.email, id: result.id });
 	}
 }
