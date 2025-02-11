@@ -1,5 +1,5 @@
 import { BaseController } from '../common/base.controller';
-import { NextFunction, Request, Response } from 'express';
+import e, { NextFunction, Request, Response } from 'express';
 import { injectable, inject } from 'inversify';
 import { TYPES } from '../types';
 import { ILogger } from '../logger/logger.interface';
@@ -12,12 +12,15 @@ import { UserService } from './users.service';
 import { IUsersService } from './users.service.interface';
 import { HTTPError } from '../errors/http-error.class';
 import { ValidateMiddleware } from '../common/validate.middleware.interface';
+import { sign } from 'jsonwebtoken';
+import { IConfigService } from '../config/config.service.interface';
 
 @injectable()
 export class UserController extends BaseController implements IUsersController {
 	constructor(
 		@inject(TYPES.ILogger) protected logger: ILogger,
 		@inject(TYPES.IUserService) private userService: IUsersService,
+		@inject(TYPES.IConfigService) private configService: IConfigService,
 	) {
 		super(logger);
 		this.bindRouter([
@@ -48,7 +51,8 @@ export class UserController extends BaseController implements IUsersController {
 		if (result === false) {
 			return next(new HTTPError(403, 'Неверный пароль'));
 		}
-		this.ok(res, 'Пользователь успешно авторизован');
+		const jwt = await this.signJWT(body.email, this.configService.get('SECRET'));
+		this.ok(res, { jwt });
 	}
 
 	async register(
@@ -61,5 +65,27 @@ export class UserController extends BaseController implements IUsersController {
 			return next(new HTTPError(422, 'Такой пользователь уже существует'));
 		}
 		this.ok(res, { email: result.email, id: result.id });
+	}
+
+	private signJWT(email: string, secret: string): Promise<string> {
+		return new Promise<string>((res, rej) => {
+			sign(
+				{
+					email,
+					iat: Math.floor(Date.now() / 1000),
+				},
+				secret,
+				{
+					algorithm: 'HS256',
+				},
+				(err, token) => {
+					if (err || !token) {
+						rej(err?.message || 'Не удалось получить токен');
+					} else {
+						res(token);
+					}
+				},
+			);
+		});
 	}
 }
