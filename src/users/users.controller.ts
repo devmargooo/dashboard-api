@@ -21,7 +21,12 @@ export class UserController extends BaseController implements IUsersController {
 	) {
 		super(logger);
 		this.bindRouter([
-			{ path: '/login', method: 'post', func: this.login },
+			{
+				path: '/login',
+				method: 'post',
+				func: this.login,
+				middlewares: [new ValidateMiddleware(UserLoginDto)],
+			},
 			{
 				path: '/register',
 				method: 'post',
@@ -31,9 +36,19 @@ export class UserController extends BaseController implements IUsersController {
 		]);
 	}
 
-	login(req: Request<any, any, UserLoginDto>, res: Response): void {
-		console.log(req.body);
-		this.ok(res, 'login');
+	async login(
+		{ body }: Request<any, any, UserLoginDto>,
+		res: Response,
+		next: NextFunction,
+	): Promise<void> {
+		const result = await this.userService.validateUser(body);
+		if (result === null) {
+			return next(new HTTPError(404, 'Пользователь не найден'));
+		}
+		if (result === false) {
+			return next(new HTTPError(403, 'Неверный пароль'));
+		}
+		this.ok(res, 'Пользователь успешно авторизован');
 	}
 
 	async register(
