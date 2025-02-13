@@ -1,7 +1,9 @@
-import { Request, Response, Router, NextFunction } from 'express';
+import { Response, Router, NextFunction } from 'express';
+import { IUserRequest } from './types';
 
 export interface IUsersController {
 	router: Router;
-	login(req: Request, res: Response, next: NextFunction): void;
-	register(req: Request, res: Response, next: NextFunction): void;
+	login(req: IUserRequest, res: Response, next: NextFunction): Promise<void>;
+	register(req: IUserRequest, res: Response, next: NextFunction): Promise<void>;
+	info(req: IUserRequest, res: Response, next: NextFunction): Promise<void>;
 }

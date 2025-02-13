@@ -1,5 +1,5 @@
 import { BaseController } from '../common/base.controller';
-import e, { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { injectable, inject } from 'inversify';
 import { TYPES } from '../types';
 import { ILogger } from '../logger/logger.interface';
@@ -7,13 +7,13 @@ import 'reflect-metadata';
 import { IUsersController } from './users.controller.interface';
 import { UserLoginDto } from './dto/user-login.dto';
 import { UserRegisterDto } from './dto/user-register.dto';
-import { User } from './user.entity';
-import { UserService } from './users.service';
 import { IUsersService } from './users.service.interface';
 import { HTTPError } from '../errors/http-error.class';
 import { ValidateMiddleware } from '../common/validate.middleware.interface';
 import { sign } from 'jsonwebtoken';
 import { IConfigService } from '../config/config.service.interface';
+import { IUserRequest } from './types';
+import { AuthGuard } from '../common/auth.guard';
 
 @injectable()
 export class UserController extends BaseController implements IUsersController {
@@ -29,6 +29,12 @@ export class UserController extends BaseController implements IUsersController {
 				method: 'post',
 				func: this.login,
 				middlewares: [new ValidateMiddleware(UserLoginDto)],
+			},
+			{
+				path: '/info',
+				method: 'get',
+				func: this.info,
+				middlewares: [new AuthGuard()],
 			},
 			{
 				path: '/register',
@@ -87,5 +93,10 @@ export class UserController extends BaseController implements IUsersController {
 				},
 			);
 		});
+	}
+
+	async info(req: Request, res: Response, next: NextFunction): Promise<void> {
+		const userInfo = await this.userService.getUserInfo((req as IUserRequest).user);
+		this.ok(res, { email: userInfo?.email, id: userInfo?.id });
 	}
 }
