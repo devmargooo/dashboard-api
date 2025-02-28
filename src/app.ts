@@ -53,4 +53,8 @@ export class App {
 			this.logger.log('Server started');
 		});
 	}
+
+	public close(): void {
+		this.server.close();
+	}
 }
